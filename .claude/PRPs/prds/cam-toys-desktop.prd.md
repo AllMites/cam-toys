@@ -226,11 +226,11 @@ export interface Frame {
 | # | Phase | Description | Status | Parallel | Depends | PRP Plan |
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Scaffold | Electron + Svelte + Vite + TS, delete old toys, tray, window, settings IPC, `types.ts` contract frozen | complete | - | - | [plan](../plans/completed/phase-1-scaffold.plan.md) · [report](../reports/phase-1-scaffold-report.md) |
-| 2 | Virtual cam | Softcam build + koffi preload bridge + NSIS register + Discord/Zoom visibility spike | pending | with 3, 4 | 1 | - |
+| 2 | Virtual cam | Softcam build + koffi preload bridge + NSIS register + Discord/Zoom visibility spike | complete | with 3, 4 | 1 | [plan](../plans/completed/phase-2-vcam.plan.md) · `docs/VCAM.md` |
 | 3 | Engine | Camera capture, tracker manager (lazy MediaPipe), WebGL2 pass chain, layer stack runtime, fps meter | complete | with 2, 4 | 1 | [plan](../plans/completed/phase-3-engine.plan.md) · [report](../reports/phase-3-engine-report.md) |
-| 4 | UI shell | Design tokens, layout, carousel, layers drawer, param controls, settings, tutorial (against mock engine) | pending | with 2, 3 | 1 | - |
-| 5 | Filter pack | Catalog filters in 5 parallel batches: Face AR · Eyes+Expressions · Hands · Body+Background · Color+Retro+Art+Motion | pending | batches parallel | 3 | - |
-| 6 | Integrate | Wire UI ↔ engine ↔ vcam, presets, hotkeys, snapshot, heavy warnings, auto-degrade | pending | - | 2, 4, 5 | - |
+| 4 | UI shell | Design tokens, layout, carousel, layers drawer, param controls, settings, tutorial (against mock engine) | complete | with 2, 3 | 1 | [plan](../plans/completed/phase-4-ui-shell.plan.md) · [report](../reports/phase-4-ui-shell-report.md) |
+| 5 | Filter pack | Catalog filters in 5 parallel batches: Face AR · Eyes+Expressions · Hands · Body+Background · Color+Retro+Art+Motion | complete | batches parallel | 3 | commit d89365e (43 filters, headless smoke) |
+| 6 | Integrate | Wire UI ↔ engine ↔ vcam, presets, hotkeys, snapshot, heavy warnings, auto-degrade | in-progress | - | 2, 4, 5 | [plan](../plans/phase-6-integrate.plan.md) |
 | 7 | Ship | GitHub Actions release on tag, README (install + SmartScreen + Discord setup), ADDING_A_FILTER.md, notices, smoke test | pending | - | 6 | - |
 
 ### Phase Details
