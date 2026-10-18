@@ -7,6 +7,11 @@ files:
   - out/**
   - package.json
   - resources/** # ?asset files (tray.png, softcam.dll) resolve to ../../resources at runtime
+extraResources:
+  - from: THIRD_PARTY_NOTICES.md
+    to: THIRD_PARTY_NOTICES.md
+  - from: LICENSE
+    to: LICENSE.txt
 asarUnpack:
   - resources/**
   - '**/*.node'
@@ -30,3 +35,4 @@ publish:
   provider: github
   owner: AllMites
   repo: cam-toys
+  releaseType: release

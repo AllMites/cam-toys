@@ -19,7 +19,8 @@
     "gallery": "vite --config src/engine/dev/vite.config.mjs --open /src/engine/dev/gallery.html",
     "models": "node scripts/fetch-models.mjs",
     "postinstall": "install-electron && electron-builder install-app-deps",
-    "smoke": "electron scripts/smoke/run.mjs"
+    "smoke": "electron scripts/smoke/run.mjs",
+    "screenshot": "electron scripts/screenshot.mjs"
   },
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",
@@ -37,5 +38,13 @@
     "svelte-check": "^4.7.6",
     "typescript": "^5.9.3",
     "vite": "^8.3.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AllMites/cam-toys.git"
+  },
+  "homepage": "https://github.com/AllMites/cam-toys#readme",
+  "bugs": {
+    "url": "https://github.com/AllMites/cam-toys/issues"
   }
 }

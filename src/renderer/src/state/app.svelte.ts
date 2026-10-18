@@ -113,7 +113,8 @@ function restartVcam() {
   app.vcamOk = v.start(s.width, s.height, s.fps)
 }
 
-function onStats(s: EngineStats) {
+function onStats(raw: EngineStats) {
+  const s = { ...raw, fps: Math.round(raw.fps) } // engine reports a float
   app.stats = s
   const now = performance.now()
   if (s.fps >= 24 || !app.layers.some((l) => l.enabled)) { lowSince = 0; return }

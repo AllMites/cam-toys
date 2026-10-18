@@ -231,7 +231,7 @@ export interface Frame {
 | 4 | UI shell | Design tokens, layout, carousel, layers drawer, param controls, settings, tutorial (against mock engine) | complete | with 2, 3 | 1 | [plan](../plans/completed/phase-4-ui-shell.plan.md) · [report](../reports/phase-4-ui-shell-report.md) |
 | 5 | Filter pack | Catalog filters in 5 parallel batches: Face AR · Eyes+Expressions · Hands · Body+Background · Color+Retro+Art+Motion | complete | batches parallel | 3 | commit d89365e (43 filters, headless smoke) |
 | 6 | Integrate | Wire UI ↔ engine ↔ vcam, presets, hotkeys, snapshot, heavy warnings, auto-degrade | complete | - | 2, 4, 5 | [plan](../plans/completed/phase-6-integrate.plan.md) · [report](../reports/phase-6-integrate-report.md) |
-| 7 | Ship | GitHub Actions release on tag, README (install + SmartScreen + Discord setup), ADDING_A_FILTER.md, notices, smoke test | pending | - | 6 | - |
+| 7 | Ship | GitHub Actions release on tag, README (install + SmartScreen + Discord setup), ADDING_A_FILTER.md, notices, smoke test | complete | - | 6 | [plan](../plans/completed/phase-7-ship.plan.md) · [report](../reports/phase-7-ship-report.md) |
 
 ### Phase Details
 
@@ -309,4 +309,4 @@ Snap Camera (discontinued 2023) was the free desktop AR leader. ManyCam and XSpl
 ---
 
 *Generated: 2026-10-18*
-*Status: DRAFT - needs validation (vcam spike, bear filter identity)*
+*Status: v0.1.0 built; release pending GitHub repo*
