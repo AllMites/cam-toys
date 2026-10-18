@@ -1,0 +1,34 @@
+{
+  "name": "cam-toys",
+  "productName": "cam-toys",
+  "version": "0.1.0",
+  "description": "Fun webcam filters + virtual camera",
+  "main": "./out/main/index.js",
+  "author": "AllMites",
+  "license": "MIT",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
+    "build:win": "npm run build && electron-builder --win --x64",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json --composite false && svelte-check --tsconfig ./tsconfig.web.json",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "icons": "node scripts/make-icons.mjs",
+    "postinstall": "install-electron && electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@electron-toolkit/utils": "^4.0.0"
+  },
+  "devDependencies": {
+    "@electron-toolkit/tsconfig": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/node": "^24.19.2",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^6.0.0",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4"
+  }
+}

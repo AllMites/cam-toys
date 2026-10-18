@@ -1,0 +1,12 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*", "src/engine/types.ts"],
+  "compilerOptions": {
+    "composite": true,
+    "types": ["electron-vite/node"],
+    "lib": ["ES2023", "DOM"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": { "@engine/*": ["./src/engine/*"], "@filters/*": ["./src/filters/*"] }
+  }
+}

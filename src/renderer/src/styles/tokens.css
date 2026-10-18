@@ -1,0 +1,16 @@
+:root {
+  --bg: #0f0f12;
+  --panel: #1a1a20;
+  --panel-glass: rgba(26, 26, 32, 0.72);
+  --border: #2a2a33;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --grad: linear-gradient(135deg, var(--purple), var(--pink));
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }

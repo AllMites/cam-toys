@@ -1,15 +1,14 @@
 # cam-toys
 
-Browser camera effects built from scratch, for fun and learning. Vanilla JS, no build.
+Fun webcam filters (face, eyes, hands, body, shaders) with stacking, piped to a virtual camera you can pick in Discord, Zoom or Meet. Windows desktop app. Work in progress.
 
-## Run
+## Develop
 ```
-python -m http.server 8000
+npm install
+npm run dev
 ```
-Open http://localhost:8000. The camera only works on `localhost` or HTTPS, and ES modules need http (not `file://`).
 
-## Toys
-ascii, motion, shader, hands, pose. Each is one self-contained `.html` file with a "how it works" comment at the top. Shared camera code is in `cam.js`.
+`npm test` runs the unit checks, `npm run typecheck` runs the type checks, and `npm run build:win` builds the installer into `dist/`.
 
-## Status
-All five pages load and show the camera-denied message correctly (checked in a camera-blocked browser pane). Live effects need a real camera: open in your own browser. Phone testing needs HTTPS (plain http://LAN-IP blocks the camera).
+## License
+MIT
