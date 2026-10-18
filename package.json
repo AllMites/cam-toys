@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",
-    "@mediapipe/tasks-vision": "^1.1.1"
+    "@mediapipe/tasks-vision": "^1.1.1",
+    "koffi": "^3.3.3"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^2.0.0",

@@ -6,6 +6,7 @@ directories:
 files:
   - out/**
   - package.json
+  - resources/** # ?asset files (tray.png, softcam.dll) resolve to ../../resources at runtime
 asarUnpack:
   - resources/**
   - '**/*.node'
