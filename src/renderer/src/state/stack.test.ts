@@ -1,7 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { FilterDef } from '@engine/types'
-// @ts-expect-error node --test needs the .ts extension; tsconfig.web.json doesn't enable allowImportingTsExtensions
 import { defaults, makeLayer, applyPreset, move, randomStack, fromSaved, toSaved } from './stack.ts'
 
 const def = (id: string, category: FilterDef['category'], cost: FilterDef['cost'] = 'light'): FilterDef => ({
