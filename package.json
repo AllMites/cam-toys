@@ -6,7 +6,9 @@
   "main": "./out/main/index.js",
   "author": "AllMites",
   "license": "MIT",
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
@@ -17,7 +19,8 @@
     "postinstall": "install-electron && electron-builder install-app-deps"
   },
   "dependencies": {
-    "@electron-toolkit/utils": "^4.0.0"
+    "@electron-toolkit/utils": "^4.0.0",
+    "koffi": "^3.3.3"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^2.0.0",
