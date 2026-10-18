@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pose</title>
+<style>
+  body { margin: 0; background: #000; display: grid; place-items: center; min-height: 100vh; color: #888; font: 14px system-ui; }
+  canvas { max-width: 100vw; max-height: 100vh; }
+  #hint { position: fixed; bottom: 8px; left: 8px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">loading model…</div>
+<script type="module">
+/*
+  HOW IT WORKS
+  PoseLandmarker returns two different things per person:
+   - 33 landmarks (joints), normalised 0..1. Index 15 = left wrist, 16 = right wrist.
+   - a segmentation mask: one 0..1 value per pixel saying "this pixel is the person".
+  Skeleton mode draws joints and bones on the video. Silhouette mode (key M) paints the mask as a
+  solid shape on a dark background: that's the "Kinect body shape" look, with no depth sensor.
+  Ball toy: gravity pulls the ball down; if a wrist touches it, we push it away from the wrist.
+  x is flipped (1 - x) because the display is mirrored.
+*/
+import { startCamera, showError, fitCanvas } from './cam.js';
+import { PoseLandmarker, FilesetResolver } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+
+const BONES = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],
+  [23,25],[25,27],[24,26],[26,28],[27,29],[28,30],[29,31],[30,32],[0,11],[0,12]];
+const hint = document.getElementById('hint');
+
+try {
+  const video = await startCamera();
+  const canvas = document.getElementById('c');
+  fitCanvas(canvas, video);
+  const ctx = canvas.getContext('2d');
+
+  const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  const landmarker = await PoseLandmarker.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task' },
+    runningMode: 'VIDEO',
+    numPoses: 1,
+    outputSegmentationMasks: true,
+  });
+  hint.textContent = 'M toggles silhouette · hit the ball with your hands';
+
+  let silhouette = false;
+  addEventListener('keydown', (e) => { if (e.key === 'm') silhouette = !silhouette; });
+
+  // silhouette buffer at mask resolution
+  const maskCanvas = document.createElement('canvas');
+  const mctx = maskCanvas.getContext('2d');
+
+  const ball = { x: canvas.width / 2, y: 80, vx: 0, vy: 0, r: 30 };
+  let pose = null;       // landmarks of first person, or null
+  let lastTime = -1;
+  let prevWrists = null;
+
+  function onResult(r) {
+    pose = r.landmarks[0] || null;
+    const m = r.segmentationMasks && r.segmentationMasks[0];
+    if (m && silhouette) { // paint mask into maskCanvas (must happen inside the callback)
+      const data = m.getAsFloat32Array();
+      maskCanvas.width = m.width; maskCanvas.height = m.height;
+      const img = mctx.createImageData(m.width, m.height);
+      for (let i = 0; i < data.length; i++) {
+        img.data[i * 4] = 80; img.data[i * 4 + 1] = 220; img.data[i * 4 + 2] = 255;
+        img.data[i * 4 + 3] = data[i] > 0.5 ? 255 : 0;
+      }
+      mctx.putImageData(img, 0, 0);
+    }
+    if (m) m.close();
+  }
+
+  function frame() {
+    if (video.currentTime !== lastTime) {
+      lastTime = video.currentTime;
+      landmarker.detectForVideo(video, performance.now(), onResult);
+    }
+    const W = canvas.width, H = canvas.height;
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);
+    if (silhouette) {
+      ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
+      if (pose && maskCanvas.width) ctx.drawImage(maskCanvas, 0, 0, W, H);
+    } else {
+      ctx.drawImage(video, 0, 0, W, H);
+    }
+    ctx.restore();
+
+    const P = (l) => [(1 - l.x) * W, l.y * H];
+    const wrists = [];
+    if (pose) {
+      ctx.strokeStyle = '#0f8'; ctx.lineWidth = 4;
+      for (const [a, b] of BONES) {
+        ctx.beginPath(); ctx.moveTo(...P(pose[a])); ctx.lineTo(...P(pose[b])); ctx.stroke();
+      }
+      ctx.fillStyle = '#fff';
+      for (const l of pose) { const [x, y] = P(l); ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill(); }
+      wrists.push(P(pose[15]), P(pose[16]));
+    }
+
+    // ball physics
+    ball.vy += 0.6;
+    for (let i = 0; i < wrists.length; i++) {
+      const [wx, wy] = wrists[i];
+      const dx = ball.x - wx, dy = ball.y - wy, d = Math.hypot(dx, dy);
+      if (d < ball.r + 20) {
+        const pv = prevWrists && prevWrists[i] ? [wx - prevWrists[i][0], wy - prevWrists[i][1]] : [0, 0];
+        const nx = dx / (d || 1), ny = dy / (d || 1);
+        ball.vx = nx * 14 + pv[0] * 0.5;
+        ball.vy = ny * 14 + pv[1] * 0.5;
+        ball.x = wx + nx * (ball.r + 20);
+        ball.y = wy + ny * (ball.r + 20);
+      }
+    }
+    prevWrists = wrists.length ? wrists : null;
+    ball.x += ball.vx; ball.y += ball.vy; ball.vx *= 0.99;
+    if (ball.x < ball.r || ball.x > W - ball.r) { ball.vx *= -0.8; ball.x = Math.min(W - ball.r, Math.max(ball.r, ball.x)); }
+    if (ball.y > H - ball.r) { ball.vy *= -0.8; ball.y = H - ball.r; if (Math.abs(ball.vy) < 2) ball.vy = -12; }
+    if (ball.y < ball.r) { ball.vy = Math.abs(ball.vy); ball.y = ball.r; }
+    ctx.fillStyle = '#ff4d6d';
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, 7); ctx.fill();
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+} catch (e) {
+  showError(e.message);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>shader</title>
+<style>
+  body { margin: 0; background: #000; display: grid; place-items: center; min-height: 100vh; color: #888; font: 14px system-ui; }
+  canvas { max-width: 100vw; max-height: 100vh; }
+  #hint { position: fixed; bottom: 8px; left: 8px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">keys 1 mirror · 2 glitch · 3 kaleidoscope</div>
+<script type="module">
+/*
+  HOW IT WORKS
+  A fragment shader is a tiny program the GPU runs once per output pixel, in parallel.
+  1. We draw one rectangle that covers the whole canvas.
+  2. Each frame we upload the <video> as a texture (texImage2D).
+  3. The shader gets uv = (0..1, 0..1) for its pixel and decides which texture position to sample.
+     Changing WHERE we sample = warping; changing the colour we return = colour effects.
+  Modes:
+   0 mirror: sample at (1-u, v).
+   1 glitch: shift red/blue channels sideways by different amounts + random row jitter.
+   2 kaleidoscope: go to polar coords around the centre, fold the angle into 6 mirrored slices.
+*/
+import { startCamera, showError, fitCanvas } from './cam.js';
+
+const VERT = `
+attribute vec2 p;
+varying vec2 uv;
+void main(){ uv = p*0.5+0.5; gl_Position = vec4(p,0.,1.); }`;
+
+const FRAG = `
+precision mediump float;
+varying vec2 uv;
+uniform sampler2D tex;
+uniform float t;
+uniform int mode;
+float rnd(float x){ return fract(sin(x*91.345)*47453.5453); }
+vec3 cam(vec2 q){ return texture2D(tex, vec2(1.-q.x, 1.-q.y)).rgb; } // mirror + flip (video rows are top-down)
+void main(){
+  if(mode==0){ gl_FragColor = vec4(cam(uv),1.); return; }
+  if(mode==1){
+    float row = floor(uv.y*60.);
+    float jitter = (rnd(row + floor(t*8.)) - .5) * .05 * step(.85, rnd(row*1.7 + floor(t*8.)));
+    float s = .01 + .015*sin(t*2.);
+    vec2 q = vec2(uv.x + jitter, uv.y);
+    gl_FragColor = vec4(cam(q+vec2(s,0.)).r, cam(q).g, cam(q-vec2(s,0.)).b, 1.);
+    return;
+  }
+  vec2 c = uv - .5;
+  float a = atan(c.y, c.x), r = length(c);
+  float seg = 6.283185/6.;
+  a = abs(mod(a, seg) - seg*.5);       // fold into mirrored slices
+  a += t*.2;
+  vec2 q = .5 + r*vec2(cos(a), sin(a));
+  gl_FragColor = vec4(cam(q),1.);
+}`;
+
+try {
+  const video = await startCamera();
+  const canvas = document.getElementById('c');
+  fitCanvas(canvas, video);
+  const gl = canvas.getContext('webgl');
+  if (!gl) throw new Error('WebGL not supported');
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('Shader error: ' + gl.getShaderInfoLog(s));
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+  const uT = gl.getUniformLocation(prog, 't');
+  const uMode = gl.getUniformLocation(prog, 'mode');
+  let mode = 1;
+  addEventListener('keydown', (e) => { if ('123'.includes(e.key)) mode = +e.key - 1; });
+
+  function frame(ms) {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
+    gl.uniform1f(uT, ms / 1000);
+    gl.uniform1i(uMode, mode);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+} catch (e) {
+  showError(e.message);
+}
+</script>
+</body>
+</html>
