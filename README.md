@@ -10,3 +10,6 @@ Open http://localhost:8000. The camera only works on `localhost` or HTTPS, and E
 
 ## Toys
 ascii, motion, shader, hands, pose. Each is one self-contained `.html` file with a "how it works" comment at the top. Shared camera code is in `cam.js`.
+
+## Status
+All five pages load and show the camera-denied message correctly (checked in a camera-blocked browser pane). Live effects need a real camera: open in your own browser. Phone testing needs HTTPS (plain http://LAN-IP blocks the camera).
