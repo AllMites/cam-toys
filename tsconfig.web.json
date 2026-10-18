@@ -5,7 +5,8 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.svelte",
     "src/engine/**/*",
-    "src/filters/**/*"
+    "src/filters/**/*",
+    "src/presets/**/*"
   ],
   "compilerOptions": {
     "verbatimModuleSyntax": true,

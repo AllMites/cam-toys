@@ -63,7 +63,10 @@ export class Trackers {
   private ctx = this.canvas.getContext('2d', { willReadFrequently: false })!
   private lastTs = 0
 
-  constructor(private onError: (e: Error) => void) {}
+  constructor(
+    private onError: (e: Error) => void,
+    private onLoading: (needs: Need[]) => void = () => {} // drives the UI's loading shimmer
+  ) {}
 
   /** Set which trackers should exist. Loads missing ones in the background, closes extras. */
   want(needs: Iterable<Need>): void {
@@ -76,10 +79,14 @@ export class Trackers {
 
   private start(k: Kind): void {
     this.loading.add(k)
+    this.onLoading([...this.loading])
     load[k]()
       .then((t) => (this.wanted.has(k) ? this.ready.set(k, t) : t.close()))
       .catch((e) => this.onError(new Error(`Could not load ${k} tracker: ${e?.message ?? e}`, { cause: e })))
-      .finally(() => this.loading.delete(k))
+      .finally(() => {
+        this.loading.delete(k)
+        this.onLoading([...this.loading])
+      })
   }
 
   run(frame: VideoFrame): TrackResults {

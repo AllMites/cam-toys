@@ -13,7 +13,7 @@ export const app = $state({
   layers: [] as Layer[],
   stats: { fps: 0, trackMs: 0, renderMs: 0 } as EngineStats,
   cameras: [] as MediaDeviceInfo[],
-  status: 'starting' as 'starting' | 'running' | 'error',
+  status: 'starting' as 'starting' | 'running' | 'paused' | 'error',
   error: null as CamError | null,
   errorMsg: '',
   loading: [] as Need[],
@@ -63,6 +63,10 @@ export async function init() {
     lastFrame = performance.now()
   })
   setInterval(() => { app.live = app.vcamOk && performance.now() - lastFrame < 1000 }, 500)
+
+  // Tray menu + global hotkeys arrive from the main process.
+  api().setPresets(presets.map(({ id, name, icon }) => ({ id, name, icon })))
+  api().onCommand((c) => (c.type === 'camera' ? toggleCamera() : presetCommand(c.id)))
 
   // single sink: every layer change (including in-place param edits) reaches the engine + disk
   $effect.root(() => {
@@ -121,13 +125,44 @@ function onStats(s: EngineStats) {
   }
 }
 
+// Pause frees the webcam (the call keeps the last frame); resume restarts it.
+export function toggleCamera() {
+  if (app.status === 'paused') return void startCamera()
+  engine.stop()
+  app.status = 'paused'
+  toast('⏸️', 'Camera paused', 2200)
+}
+
+export async function snapshot() {
+  try {
+    const png = new Uint8Array(await (await engine.snapshot()).arrayBuffer())
+    await api().saveSnapshot(png)
+    toast('📸', 'Saved to Pictures › cam-toys', 3000)
+  } catch (e) {
+    console.warn('[snapshot]', e)
+    toast('⚠️', 'Snapshot failed. Is the camera running?', 4000)
+  }
+}
+
+// From a hotkey or the tray: no window to answer the ⚡ prompt in, so apply directly.
+function presetCommand(id: string) {
+  const i = presets.findIndex((p) => p.id === app.activePreset)
+  const p = id === 'next' ? presets[(i + 1) % presets.length]
+    : id === 'prev' ? presets[(i - 1 + presets.length) % presets.length]
+    : presets.find((x) => x.id === id)
+  if (!p) return
+  app.layers = stack.applyPreset(p, byId)
+  app.activePreset = p.id
+  toast(p.icon, p.name, 1800)
+}
+
 // ---------- settings ----------
 export async function setSettings(patch: Partial<Settings>) {
   const prev = app.settings
   app.settings = await api().settings.set(patch)
   const s = app.settings
   if (!prev) return
-  if (prev.cameraId !== s.cameraId || prev.width !== s.width || prev.fps !== s.fps) await startCamera()
+  if (prev.cameraId !== s.cameraId || prev.width !== s.width || prev.height !== s.height || prev.fps !== s.fps) await startCamera()
 }
 
 // ---------- stack actions ----------

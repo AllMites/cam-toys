@@ -72,8 +72,16 @@ export interface Settings {
   hotkeys: { next: string; prev: string };        // 'Control+Alt+Right' / 'Control+Alt+Left'
 }
 
+// Commands the main process (tray menu, global hotkeys) sends to the UI.
+export type Command = { type: 'preset'; id: string } | { type: 'camera' }; // preset id may be 'next' | 'prev'
+export interface PresetInfo { id: string; name: string; icon: string }
+
 export interface CamtoysApi {
   settings: { get(): Promise<Settings>; set(patch: Partial<Settings>): Promise<Settings> };
   vcam: VcamApi;
   quit(): void;
+  // Added in Phase 6 (additive):
+  saveSnapshot(png: Uint8Array): Promise<string>;   // returns the saved file path
+  setPresets(list: PresetInfo[]): void;             // feeds the tray Presets submenu
+  onCommand(cb: (c: Command) => void): () => void;
 }

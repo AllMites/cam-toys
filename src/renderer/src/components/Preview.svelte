@@ -2,7 +2,7 @@
   import type { Need } from '@engine/types'
   import { onMount } from 'svelte'
   import Icon from './Icon.svelte'
-  import { app, startCamera } from '../state/app.svelte'
+  import { app, startCamera, toggleCamera } from '../state/app.svelte'
 
   let canvas: HTMLCanvasElement
   onMount(() => { startCamera(canvas) })
@@ -27,6 +27,13 @@
       <div class="state">
         <div class="spinner" aria-hidden="true"></div>
         <p class="muted">Starting camera…</p>
+      </div>
+    {:else if app.status === 'paused'}
+      <div class="state">
+        <div class="big">⏸️</div>
+        <h2>Camera paused</h2>
+        <p class="muted">Your call keeps showing the last frame.</p>
+        <button class="btn primary" onclick={toggleCamera}><Icon name="refresh" size={16} />Resume</button>
       </div>
     {:else if err}
       <div class="state" role="alert">

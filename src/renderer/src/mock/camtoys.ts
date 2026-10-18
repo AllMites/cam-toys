@@ -1,5 +1,6 @@
 import type { CamtoysApi, Settings } from '@engine/types'
-import { mockFlags } from './engine'
+// ?mock=vcam pretends the virtual camera is installed.
+const mockFlags = new Set(new URLSearchParams(location.search).get('mock')?.split(',') ?? [])
 
 // window.camtoys stand-in for running the renderer in a plain browser (no preload).
 // Settings live in localStorage; ?mock=vcam pretends the virtual camera is installed.
@@ -29,5 +30,8 @@ export const mockCamtoys: CamtoysApi = {
     send: () => {},
     stop: () => {}
   },
-  quit: () => window.close()
+  quit: () => window.close(),
+  saveSnapshot: async () => 'mock.png',
+  setPresets: () => {},
+  onCommand: () => () => {}
 }

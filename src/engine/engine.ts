@@ -11,6 +11,7 @@ export interface EngineOptions {
   height?: number
   fps?: number
   registry?: FilterDef[] // default: every filter in src/filters
+  onLoading?: (needs: Need[]) => void // tracker models still loading ([] = all ready)
 }
 
 type FrameCb = (bgr: Uint8Array, w: number, h: number) => void
@@ -30,7 +31,7 @@ export function createEngine(opts: EngineOptions = {}): EngineApi {
   }
   const sub = <T>(set: Set<T>, cb: T): (() => void) => (set.add(cb), () => void set.delete(cb))
 
-  const trackers = new Trackers(emitError)
+  const trackers = new Trackers(emitError, opts.onLoading)
   let layers: Layer[] = []
   const running = new Map<string, Running>() // key: uid + filterId
   const broken = new Set<string>() // layers that threw; skipped until setLayers changes them

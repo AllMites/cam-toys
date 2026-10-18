@@ -53,7 +53,7 @@ Fill in with ✅ / ❌ and notes (version, Windows build). "Listed" = appears in
 
 | App | Listed | Live | Notes |
 |---|---|---|---|
-| Discord desktop (Settings → Voice & Video → Camera) | | | |
+| Discord desktop (Settings → Voice & Video → Camera) | ✅ | ✅ | user-verified 2026-10-18; gallery 30 fps |
 | Zoom desktop (Settings → Video) | | | |
 | Chrome — https://webcamtests.com | | | |
 | OBS (Video Capture Device) | | | |

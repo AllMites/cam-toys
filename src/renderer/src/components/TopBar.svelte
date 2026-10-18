@@ -1,6 +1,6 @@
 <script lang="ts">
   import Icon from './Icon.svelte'
-  import { app, setSettings } from '../state/app.svelte'
+  import { app, setSettings, snapshot } from '../state/app.svelte'
 
   let vcamHelp = $state(false)
   const camId = $derived(app.settings?.cameraId ?? app.cameras[0]?.deviceId ?? '')
@@ -52,6 +52,9 @@
     <div class="fps" class:warn={fps > 0 && fps < 24} title="Frames per second">
       <b>{fps || '—'}</b> fps
     </div>
+    <button class="icon-btn" onclick={snapshot} disabled={app.status !== 'running'} aria-label="Take a snapshot" title="Snapshot (saved to Pictures)">
+      <Icon name="camera" />
+    </button>
     <button class="icon-btn" class:on={app.drawerOpen} onclick={() => (app.drawerOpen = !app.drawerOpen)}
       aria-label="Toggle layers" aria-pressed={app.drawerOpen}>
       <Icon name="layers" />

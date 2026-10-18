@@ -1,8 +1,10 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, session } from 'electron'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { load, save, merge } from './settings'
-import { createTray } from './tray'
+import { createTray, setTrayPresets } from './tray'
+import type { Command, Settings } from '../engine/types'
 
 let win: BrowserWindow | null = null
 let quitting = false
@@ -28,7 +30,8 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false // Phase 2's preload loads the Softcam DLL via koffi
+      sandbox: false, // Phase 2's preload loads the Softcam DLL via koffi
+      backgroundThrottling: false // keep feeding the virtual camera while hidden in the tray
     }
   })
   win.on('ready-to-show', () => win?.show())
@@ -49,6 +52,23 @@ function createWindow(): void {
 app.on('second-instance', showWindow)
 app.on('before-quit', () => (quitting = true))
 app.on('window-all-closed', () => {}) // stay alive in the tray
+app.on('will-quit', () => globalShortcut.unregisterAll())
+
+const send = (c: Command): void => win?.webContents.send('command', c)
+
+// Global hotkeys cycle presets even while Discord/Zoom is focused.
+function registerHotkeys(h: Settings['hotkeys']): void {
+  globalShortcut.unregisterAll()
+  const bind = (accel: string, id: 'next' | 'prev'): void => {
+    try {
+      if (!globalShortcut.register(accel, () => send({ type: 'preset', id }))) console.warn('[hotkeys] taken by another app:', accel)
+    } catch (e) {
+      console.warn('[hotkeys] invalid accelerator:', accel, e)
+    }
+  }
+  bind(h.next, 'next')
+  bind(h.prev, 'prev')
+}
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('io.github.allmites.camtoys')
@@ -60,12 +80,24 @@ app.whenReady().then(() => {
 
   ipcMain.handle('settings:get', () => settings)
   ipcMain.handle('settings:set', (_e, patch: unknown) => {
+    const prevKeys = JSON.stringify(settings.hotkeys)
     settings = merge({ ...settings, ...(patch && typeof patch === 'object' ? patch : {}) })
     save(settingsFile, settings)
+    if (JSON.stringify(settings.hotkeys) !== prevKeys) registerHotkeys(settings.hotkeys)
     return settings
   })
+  ipcMain.handle('snapshot:save', (_e, png: unknown) => {
+    if (!(png instanceof Uint8Array) || png.length < 8) throw new Error('Snapshot data is not a PNG.')
+    const dir = join(app.getPath('pictures'), 'cam-toys')
+    mkdirSync(dir, { recursive: true })
+    const file = join(dir, `cam-toys-${new Date().toISOString().replace(/[:.]/g, '-')}.png`)
+    writeFileSync(file, png)
+    return file
+  })
+  ipcMain.on('presets:list', (_e, list: unknown) => setTrayPresets(Array.isArray(list) ? list : []))
   ipcMain.on('app:quit', () => app.quit())
 
-  createTray(showWindow)
+  createTray(showWindow, send)
+  registerHotkeys(settings.hotkeys)
   createWindow()
 })
