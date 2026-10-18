@@ -6,7 +6,9 @@
   "main": "./out/main/index.js",
   "author": "AllMites",
   "license": "MIT",
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
@@ -16,7 +18,8 @@
     "icons": "node scripts/make-icons.mjs",
     "gallery": "vite --config src/engine/dev/vite.config.mjs --open /src/engine/dev/gallery.html",
     "models": "node scripts/fetch-models.mjs",
-    "postinstall": "install-electron && electron-builder install-app-deps"
+    "postinstall": "install-electron && electron-builder install-app-deps",
+    "smoke": "electron scripts/smoke/run.mjs"
   },
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",

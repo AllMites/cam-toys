@@ -21,7 +21,7 @@ test('at least 38 filters, unique ids matching filenames', () => {
     assert.equal(id, file.slice(0, -3), `${cat}/${file}: id must equal filename`)
     assert.ok(!ids.has(id!), `duplicate id ${id}`)
     ids.add(id!)
-    assert.match(src, new RegExp(`category:\s*'${cat}'`), `${cat}/${file}: category must match folder`)
+    assert.match(src, new RegExp(String.raw`category:\s*'${cat}'`), `${cat}/${file}: category must match folder`)
     assert.ok(CATEGORIES.includes(cat), `unknown category folder ${cat}`)
     assert.match(src, /export default/, `${cat}/${file}: needs a default export`)
   }

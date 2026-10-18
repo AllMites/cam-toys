@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="540" viewBox="0 0 400 540">
+<defs>
+<linearGradient id="h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c3aed"/><stop offset="0.55" stop-color="#c026d3"/><stop offset="1" stop-color="#9d174d"/></linearGradient>
+<clipPath id="c"><path d="M200 40 L362 480 Q200 520 38 480 Z"/></clipPath>
+</defs>
+<path d="M200 40 L362 480 Q200 520 38 480 Z" fill="url(#h)"/>
+<g clip-path="url(#c)">
+<path d="M0 170 L400 90 L400 130 L0 210 Z" fill="#fde047"/>
+<path d="M0 300 L400 220 L400 262 L0 342 Z" fill="#22d3ee"/>
+<path d="M0 430 L400 350 L400 392 L0 472 Z" fill="#fde047"/>
+<circle cx="170" cy="250" r="12" fill="#fff"/><circle cx="240" cy="180" r="10" fill="#fff"/>
+<circle cx="130" cy="380" r="12" fill="#fff"/><circle cx="270" cy="320" r="12" fill="#fff"/><circle cx="220" cy="430" r="11" fill="#fff"/>
+<path d="M200 40 L362 480 Q200 520 38 480 Z" fill="none" stroke="#000" stroke-opacity="0.25" stroke-width="10"/>
+</g>
+<path d="M30 478 Q60 450 90 480 Q120 450 150 482 Q180 452 200 484 Q220 452 250 482 Q280 450 310 480 Q340 450 370 478 Q380 520 200 528 Q20 520 30 478 Z" fill="#ffffff" stroke="#e2e2e2" stroke-width="5"/>
+<circle cx="200" cy="40" r="36" fill="#fde047" stroke="#f59e0b" stroke-width="6"/>
+<circle cx="188" cy="28" r="10" fill="#fff" opacity="0.8"/>
+</svg>
