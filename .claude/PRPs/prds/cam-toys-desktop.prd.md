@@ -227,7 +227,7 @@ export interface Frame {
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Scaffold | Electron + Svelte + Vite + TS, delete old toys, tray, window, settings IPC, `types.ts` contract frozen | complete | - | - | [plan](../plans/completed/phase-1-scaffold.plan.md) · [report](../reports/phase-1-scaffold-report.md) |
 | 2 | Virtual cam | Softcam build + koffi preload bridge + NSIS register + Discord/Zoom visibility spike | pending | with 3, 4 | 1 | - |
-| 3 | Engine | Camera capture, tracker manager (lazy MediaPipe), WebGL2 pass chain, layer stack runtime, fps meter | pending | with 2, 4 | 1 | - |
+| 3 | Engine | Camera capture, tracker manager (lazy MediaPipe), WebGL2 pass chain, layer stack runtime, fps meter | complete | with 2, 4 | 1 | [plan](../plans/completed/phase-3-engine.plan.md) · [report](../reports/phase-3-engine-report.md) |
 | 4 | UI shell | Design tokens, layout, carousel, layers drawer, param controls, settings, tutorial (against mock engine) | pending | with 2, 3 | 1 | - |
 | 5 | Filter pack | Catalog filters in 5 parallel batches: Face AR · Eyes+Expressions · Hands · Body+Background · Color+Retro+Art+Motion | pending | batches parallel | 3 | - |
 | 6 | Integrate | Wire UI ↔ engine ↔ vcam, presets, hotkeys, snapshot, heavy warnings, auto-degrade | pending | - | 2, 4, 5 | - |

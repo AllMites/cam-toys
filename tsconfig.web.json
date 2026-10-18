@@ -11,6 +11,8 @@
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
     "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "paths": { "@engine/*": ["./src/engine/*"], "@filters/*": ["./src/filters/*"] }
   }

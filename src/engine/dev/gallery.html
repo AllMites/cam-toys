@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cam-toys filter gallery</title>
+    <!-- Same policy as the app (plus ws: for Vite HMR) so CSP problems show up here first. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self' blob: data: ws:; worker-src 'self' blob:"
+    />
+    <style>
+      body { margin: 0; display: flex; gap: 16px; padding: 16px; background: #0f0f12; color: #eee; font: 13px system-ui, sans-serif; }
+      canvas { width: 960px; max-width: 70vw; background: #000; border-radius: 8px; }
+      aside { display: flex; flex-direction: column; gap: 6px; min-width: 240px; }
+      label { display: flex; gap: 6px; align-items: center; }
+      #stats { font-family: ui-monospace, monospace; color: #8f8; }
+      #err { color: #f77; white-space: pre-wrap; }
+      small { color: #999; }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <aside>
+      <select id="cam"></select>
+      <div id="stats">starting…</div>
+      <div id="err"></div>
+      <b>Filters (applied top to bottom)</b>
+      <div id="list"></div>
+      <button id="snap">Snapshot PNG</button>
+      <label><input type="checkbox" id="vcam" /> fake vcam subscriber (tests readback)</label>
+      <small id="vcamInfo"></small>
+    </aside>
+    <script type="module" src="./gallery.ts"></script>
+  </body>
+</html>
