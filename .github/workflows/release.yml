@@ -9,6 +9,7 @@ permissions:
 jobs:
   release:
     strategy:
+      fail-fast: false
       max-parallel: 1 # parallel jobs race to create the GitHub release (422)
       matrix:
         include:

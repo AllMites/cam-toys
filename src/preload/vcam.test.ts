@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import koffi from 'koffi'
 
 // ABI smoke test: the committed DLL loads and the sender API works without registration.
-test('softcam.dll exports the sender API', (t) => {
+test('softcam.dll exports the sender API', { skip: process.platform !== 'win32' }, (t) => {
   const lib = koffi.load('resources/softcam.dll')
   const create = lib.func('void *scCreateCamera(int, int, float)')
   const send = lib.func('void scSendFrame(void *, const uint8_t *)')
