@@ -1,50 +1,69 @@
 import type { FilterDef } from '@engine/types'
-import { bindTexture, drawFullscreen, program, uniforms } from '@engine/gl'
+import { copy } from '@engine/gl'
 import { canvasTex, clamp, drawFromBase, faceGeo, makeSticker, mid } from './_util'
 
-// "OPSEC Level: DEMON" meme: identity fully censored, only glowing demon eyes show through.
-const FS = `#version 300 es
-precision highp float;
-in vec2 uv; out vec4 o;
-uniform sampler2D uInput;
-uniform vec2 uRes, uC, uR, uE0, uE1;
-uniform float uRot, uBlock, uEyeR, uTime, uGlow;
-void main() {
-  vec2 px = uv * uRes;
-  vec2 d = px - uC;
-  float cs = cos(uRot), sn = sin(uRot);
-  vec2 l = vec2(d.x * cs + d.y * sn, -d.x * sn + d.y * cs) / uR;
-  float m = 1.0 - smoothstep(0.92, 1.0, length(l));
-  vec3 c = texture(uInput, uv).rgb;
-  // blocky censor, darkened toward the shadow-realm
-  vec2 q = (floor(px / uBlock) + 0.5) * uBlock / uRes;
-  vec3 b = texture(uInput, q).rgb;
-  b = mix(vec3(dot(b, vec3(0.3, 0.59, 0.11))), b, 0.3) * 0.45;
-  vec3 col = mix(c, b, m);
-  float flick = 0.85 + 0.15 * sin(uTime * 23.0);
-  for (int i = 0; i < 2; i++) {
-    float e = length(px - (i == 0 ? uE0 : uE1)) / uEyeR;
-    col += vec3(1.0, 0.08, 0.02) * (exp(-e * e * 1.5) * 2.0 + exp(-e * 0.9) * 0.6) * uGlow * flick;
-    col += vec3(1.0, 0.9, 0.6) * exp(-e * e * 8.0) * uGlow;
+// "OPSEC Level: DEMON" meme: hacker mask, censor bar over the eyes, level meter caption.
+const MW = 512, MH = 640
+
+function drawMask(ctx: OffscreenCanvasRenderingContext2D): void {
+  // face plate
+  const g = ctx.createRadialGradient(256, 260, 40, 256, 300, 340)
+  g.addColorStop(0, '#fbf8f0'); g.addColorStop(1, '#d9d2c2')
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.moveTo(256, 10)
+  ctx.bezierCurveTo(470, 10, 500, 250, 470, 380)
+  ctx.bezierCurveTo(440, 520, 340, 630, 256, 634)
+  ctx.bezierCurveTo(172, 630, 72, 520, 42, 380)
+  ctx.bezierCurveTo(12, 250, 42, 10, 256, 10)
+  ctx.fill()
+  ctx.lineWidth = 6; ctx.strokeStyle = '#8a8070'; ctx.stroke()
+  // rosy cheeks
+  for (const x of [140, 372]) {
+    const c = ctx.createRadialGradient(x, 380, 0, x, 380, 70)
+    c.addColorStop(0, 'rgba(225,110,110,0.7)'); c.addColorStop(1, 'rgba(225,110,110,0)')
+    ctx.fillStyle = c; ctx.fillRect(x - 70, 310, 140, 140)
   }
-  o = vec4(col, 1.0);
-}`
+  ctx.strokeStyle = '#111'; ctx.fillStyle = '#111'; ctx.lineCap = 'round'
+  // arched brows
+  ctx.lineWidth = 12
+  for (const s of [-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(256 + s * 30, 200); ctx.quadraticCurveTo(256 + s * 110, 150, 256 + s * 190, 215); ctx.stroke()
+  }
+  // nose line
+  ctx.lineWidth = 5
+  ctx.beginPath(); ctx.moveTo(250, 250); ctx.quadraticCurveTo(232, 360, 262, 380); ctx.stroke()
+  // smirk
+  ctx.lineWidth = 7
+  ctx.beginPath(); ctx.moveTo(170, 470); ctx.quadraticCurveTo(256, 520, 342, 470); ctx.stroke()
+  // curled mustache
+  for (const s of [-1, 1]) {
+    ctx.beginPath()
+    ctx.moveTo(256, 430)
+    ctx.bezierCurveTo(256 + s * 60, 405, 256 + s * 130, 420, 256 + s * 150, 380)
+    ctx.bezierCurveTo(256 + s * 165, 350, 256 + s * 190, 360, 256 + s * 185, 385)
+    ctx.bezierCurveTo(256 + s * 170, 450, 256 + s * 70, 455, 256, 445)
+    ctx.fill()
+  }
+  // goatee
+  ctx.beginPath(); ctx.moveTo(240, 520); ctx.lineTo(272, 520); ctx.lineTo(256, 610); ctx.closePath(); ctx.fill()
+}
 
 const LEVELS = ['NONE', 'LOW', 'MID', 'HIGH', 'DEMON']
 
 const opsecDemon: FilterDef = {
   id: 'opsec-demon', name: 'OPSEC Demon', category: 'face', icon: '😈',
   cost: 'medium', needs: ['face'],
-  hint: 'Identity: classified. The level meter ends where it always ends.',
+  hint: 'Mask on, eyes redacted. The level meter ends where it always ends.',
   params: {
-    block: { type: 'range', label: 'Censor size', min: 6, max: 40, step: 1, default: 18 },
+    bar: { type: 'toggle', label: 'Eye censor bar', default: true },
     horns: { type: 'toggle', label: 'Horns', default: true },
     caption: { type: 'toggle', label: 'Caption', default: true }
   },
   create(gl) {
-    const p = program(gl, FS)
-    const u = uniforms(gl, p)
     const st = makeSticker(gl)
+    const mask = canvasTex(gl, MW, MH, drawMask)
+    const bar = canvasTex(gl, 4, 4, (ctx) => { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 4, 4) })
     const horn = canvasTex(gl, 128, 256, (ctx) => {
       const g = ctx.createLinearGradient(0, 256, 0, 0)
       g.addColorStop(0, '#3a0000'); g.addColorStop(0.6, '#b00000'); g.addColorStop(1, '#ff4020')
@@ -68,36 +87,26 @@ const opsecDemon: FilterDef = {
     let t = 0
     return {
       render(f, params) {
+        copy(gl, f.input)
         const g = faceGeo(f)
         t = g ? t + f.dt : 0
-        const glow = clamp(t / 0.6, 0, 1)
-        gl.useProgram(p)
-        bindTexture(gl, 0, f.input, u.uInput)
-        gl.uniform2f(u.uRes, f.width, f.height)
-        if (g) {
-          const c = mid(g.p(10), g.p(152))
-          gl.uniform2f(u.uC, c[0], c[1])
-          gl.uniform2f(u.uR, g.W * 0.62, g.H * 0.66)
-          gl.uniform1f(u.uRot, g.roll)
-          const e0 = g.p(468), e1 = g.p(473) // iris centres
-          gl.uniform2f(u.uE0, e0[0], e0[1])
-          gl.uniform2f(u.uE1, e1[0], e1[1])
-          gl.uniform1f(u.uEyeR, g.W * 0.05)
-        } else {
-          gl.uniform2f(u.uR, 0, 0) // no face: pass through
-        }
-        gl.uniform1f(u.uBlock, Math.max(2, Number(params.block ?? 18) * f.width / 1280))
-        gl.uniform1f(u.uTime, f.time)
-        gl.uniform1f(u.uGlow, g ? glow : 0)
-        drawFullscreen(gl)
         if (!g) return
+        const grow = clamp(t / 0.6, 0, 1)
 
         if (params.horns !== false) {
-          const hw = g.W * 0.22, hh = hw * 2 * glow
+          const hw = g.W * 0.22, hh = hw * 2 * grow
           if (hh > 1) {
-            drawFromBase(st, f, g, horn, g.at(g.p(103), 0, -0.02), -hw, hh, -0.35)
-            drawFromBase(st, f, g, horn, g.at(g.p(332), 0, -0.02), hw, hh, 0.35)
+            drawFromBase(st, f, g, horn, g.at(g.p(103), 0, -0.05), -hw, hh, -0.35)
+            drawFromBase(st, f, g, horn, g.at(g.p(332), 0, -0.05), hw, hh, 0.35)
           }
+        }
+        // mask centred between forehead and chin, a touch larger than the face
+        const [cx, cy] = mid(g.p(10), g.p(152))
+        const mw = g.W * 1.18
+        st.draw(f, mask, cx, cy, mw, mw * MH / MW, g.roll)
+        if (params.bar !== false) {
+          const [ex, ey] = g.at(mid(g.p(33), g.p(263)), 0, 0.01)
+          st.draw(f, bar, ex, ey, g.W * 1.35, g.W * 0.24, g.roll)
         }
         if (params.caption !== false) {
           // ponytail: meter ticks up once per face-acquire, then locks on DEMON
@@ -109,7 +118,7 @@ const opsecDemon: FilterDef = {
         }
       },
       dispose() {
-        gl.deleteProgram(p); st.dispose(); gl.deleteTexture(horn)
+        st.dispose(); gl.deleteTexture(mask); gl.deleteTexture(bar); gl.deleteTexture(horn)
         caps.forEach((c) => gl.deleteTexture(c))
       }
     }

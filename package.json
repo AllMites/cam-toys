@@ -1,7 +1,7 @@
 {
   "name": "cam-toys",
   "productName": "cam-toys",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Fun webcam filters + virtual camera",
   "main": "./out/main/index.js",
   "author": "AllMites",
