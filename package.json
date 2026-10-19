@@ -1,7 +1,7 @@
 {
   "name": "cam-toys",
   "productName": "cam-toys",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Fun webcam filters + virtual camera",
   "main": "./out/main/index.js",
   "author": "AllMites",
@@ -13,6 +13,7 @@
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "build:win": "npm run build && electron-builder --win --x64",
+    "build:mac": "npm run build && electron-builder --mac",
     "typecheck": "tsc --noEmit -p tsconfig.node.json --composite false && svelte-check --tsconfig ./tsconfig.web.json",
     "test": "node --test \"src/**/*.test.ts\"",
     "icons": "node scripts/make-icons.mjs",

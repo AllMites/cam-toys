@@ -31,6 +31,20 @@ nsis:
   uninstallDisplayName: cam-toys
   artifactName: ${productName}-Setup-${version}.${ext}
   differentialPackage: false # no .blockmap: updater downloads the full installer; parallel blockmap upload raced to create the release (422)
+mac:
+  target:
+    - target: dmg
+      arch: [universal]
+    - target: zip # electron-updater on mac needs the zip
+      arch: [universal]
+  icon: build/icon.png
+  category: public.app-category.video
+  extendInfo:
+    NSCameraUsageDescription: cam-toys needs the camera to apply filters.
+  # ponytail: unsigned. Gatekeeper warns on first open; auto-update on mac needs a Developer ID cert + notarization.
+  identity: null
+dmg:
+  artifactName: ${productName}-${version}-mac.${ext}
 npmRebuild: false
 publish:
   provider: github

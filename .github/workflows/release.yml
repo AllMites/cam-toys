@@ -8,7 +8,15 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-latest
+    strategy:
+      max-parallel: 1 # parallel jobs race to create the GitHub release (422)
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win --x64
+          - os: macos-latest
+            target: --mac
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +27,6 @@ jobs:
       - run: npm test
       - run: npm run build
       - name: Build installer and publish to GitHub Releases
-        run: npx electron-builder --win --x64 --publish always
+        run: npx electron-builder ${{ matrix.target }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

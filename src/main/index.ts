@@ -53,6 +53,7 @@ function createWindow(): void {
 app.on('second-instance', showWindow)
 app.on('before-quit', () => (quitting = true))
 app.on('window-all-closed', () => {}) // stay alive in the tray
+app.on('activate', () => showWindow()) // mac: dock icon click
 app.on('will-quit', () => globalShortcut.unregisterAll())
 
 const send = (c: Command): void => win?.webContents.send('command', c)
