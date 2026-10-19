@@ -39,6 +39,7 @@ mac:
       arch: [universal]
   icon: build/icon.png
   category: public.app-category.video
+  x64ArchFiles: "**/koffi*/**/*.node" # koffi ships per-arch prebuilds side by side; universal merge must not lipo them
   extendInfo:
     NSCameraUsageDescription: cam-toys needs the camera to apply filters.
   # ponytail: unsigned. Gatekeeper warns on first open; auto-update on mac needs a Developer ID cert + notarization.
