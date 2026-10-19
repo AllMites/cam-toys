@@ -1,7 +1,7 @@
 {
   "name": "cam-toys",
   "productName": "cam-toys",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fun webcam filters + virtual camera",
   "main": "./out/main/index.js",
   "author": "AllMites",
@@ -25,6 +25,7 @@
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",
     "@mediapipe/tasks-vision": "^1.1.1",
+    "electron-updater": "^6.8.9",
     "koffi": "^3.3.3"
   },
   "devDependencies": {

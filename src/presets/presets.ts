@@ -5,6 +5,7 @@ import type { Preset } from '../engine/types'
 const l = (filterId: string, params = {}) => ({ filterId, enabled: true, params })
 
 export const presets: Preset[] = [
+  { id: 'p-opsec', name: 'OPSEC Demon', icon: '😈', layers: [l('blur'), l('opsec-demon'), l('cctv')] },
   { id: 'p-bear', name: 'Bear', icon: '🐻', layers: [l('bear')] },
   { id: 'p-puppy', name: 'Puppy', icon: '🐶', layers: [l('puppy')] },
   { id: 'p-cozy', name: 'Cozy', icon: '☕', layers: [l('beauty'), l('lut', { grade: 'Warm' }), l('blur')] },

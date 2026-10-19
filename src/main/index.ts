@@ -1,6 +1,7 @@
 import { app, BrowserWindow, globalShortcut, ipcMain, session } from 'electron'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { autoUpdater } from 'electron-updater'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { load, save, merge } from './settings'
 import { createTray, setTrayPresets } from './tray'
@@ -100,4 +101,10 @@ app.whenReady().then(() => {
   createTray(showWindow, send)
   registerHotkeys(settings.hotkeys)
   createWindow()
+
+  // Auto-update: electron-updater reads latest.yml from the newest GitHub Release
+  // (electron-builder uploads it next to the installer), downloads in the background,
+  // shows a Windows notification, and installs on next quit.
+  // Dev builds have no app-update.yml, so only run when packaged.
+  if (app.isPackaged) autoUpdater.checkForUpdatesAndNotify().catch((e) => console.warn('[update]', e))
 })

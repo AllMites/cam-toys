@@ -30,7 +30,7 @@ nsis:
   shortcutName: cam-toys
   uninstallDisplayName: cam-toys
   artifactName: ${productName}-Setup-${version}.${ext}
-  differentialPackage: false # no .blockmap: no auto-update, and two parallel uploads raced to create the release (422)
+  differentialPackage: false # no .blockmap: updater downloads the full installer; parallel blockmap upload raced to create the release (422)
 npmRebuild: false
 publish:
   provider: github
