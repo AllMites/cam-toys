@@ -170,15 +170,8 @@ export function drawFromBase(s: Sticker, f: Frame, g: FaceGeo, tex: WebGLTexture
 
 // --- Skin smoothing masked to the face oval -------------------------------------------------
 
-const SMOOTH_FS = `#version 300 es
-precision highp float;
-in vec2 uv; out vec4 o;
-uniform sampler2D uInput;
-uniform vec2 uRes;
-uniform vec2 uPoly[36];
-uniform vec4 uBox;
-uniform float uFeather, uRadius, uSmooth, uBright, uWarm;
-float sdPoly(vec2 p) {
+/** GLSL signed distance (px, - = inside) to the 36-point `uniform vec2 uPoly[36]` (fill it from OVAL). */
+export const SD_POLY = `float sdPoly(vec2 p) {
   float d = dot(p - uPoly[0], p - uPoly[0]);
   float s = 1.0;
   for (int i = 0; i < 36; i++) {
@@ -192,6 +185,17 @@ float sdPoly(vec2 p) {
   }
   return s * sqrt(d);
 }
+`
+
+const SMOOTH_FS = `#version 300 es
+precision highp float;
+in vec2 uv; out vec4 o;
+uniform sampler2D uInput;
+uniform vec2 uRes;
+uniform vec2 uPoly[36];
+uniform vec4 uBox;
+uniform float uFeather, uRadius, uSmooth, uBright, uWarm;
+${SD_POLY}
 void main() {
   vec4 c = texture(uInput, uv);
   vec2 px = uv * uRes;
